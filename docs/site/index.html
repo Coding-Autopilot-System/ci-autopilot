@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CI Autopilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --bg-alt: #141b22;
+      --ink: #e8edf2;
+      --muted: #a3b0bd;
+      --accent: #ff7a59;
+      --accent-2: #3ed4a3;
+      --line: rgba(255, 255, 255, 0.12);
+      --card: rgba(20, 27, 34, 0.9);
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(62, 212, 163, 0.18), transparent),
+        radial-gradient(900px 500px at 90% 10%, rgba(255, 122, 89, 0.2), transparent),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 48px 6vw 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 32px;
+      align-items: center;
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 5vw, 60px);
+      margin: 0 0 12px;
+    }
+
+    .hero p {
+      font-size: 18px;
+      line-height: 1.6;
+      color: var(--muted);
+      margin: 0 0 24px;
+    }
+
+    .cta {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.04);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .button.primary {
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      color: #0a0f14;
+      border: none;
+      font-weight: 600;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .button.primary:hover {
+      background: linear-gradient(120deg, #ff9b79, #6ae4be);
+    }
+
+    .hero-card {
+      background: var(--card);
+      border-radius: 22px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      font-family: "IBM Plex Mono", "Consolas", monospace;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    main {
+      padding: 24px 6vw 80px;
+      display: grid;
+      gap: 28px;
+    }
+
+    section {
+      background: var(--bg-alt);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      animation: rise 0.7s ease both;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 26px;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    code, pre {
+      font-family: "IBM Plex Mono", "Consolas", monospace;
+      color: var(--ink);
+    }
+
+    pre {
+      background: rgba(15, 20, 25, 0.8);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      overflow-x: auto;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      margin-bottom: 12px;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+      nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div>CI Autopilot</div>
+      <div>Enterprise CI Control Plane</div>
+    </nav>
+    <div class="hero">
+      <div>
+        <div class="tag">Operational Excellence</div>
+        <h1>Self-hosted automation for reliable CI recovery.</h1>
+        <p>CI Autopilot provides a hardened runner, disciplined workflows, and a clear operational playbook so incidents are resolved quickly and safely.</p>
+        <div class="cta">
+          <a class="button primary" href="../runner-setup.md">Runner setup</a>
+          <a class="button" href="../operations.md">Operations runbook</a>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div>// Quick verification</div>
+        <pre><code>gh auth status
+
+$serviceName = Get-Content .\.service
+Get-Service -Name $serviceName</code></pre>
+        <div>// Runner health</div>
+        <pre><code>gh api repos/Coding-Autopilot-System/ci-autopilot/actions/runners \
+  -q '.runners[] | {name, status, online}'</code></pre>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section style="animation-delay: 0.05s;">
+      <div class="tag">Architecture</div>
+      <h2>Designed for deterministic recovery</h2>
+      <div class="grid">
+        <div>
+          <h3>Runner host</h3>
+          <ul>
+            <li>Windows service for consistent execution.</li>
+            <li>Separation between orchestration and execution.</li>
+            <li>Local logs for host-level diagnostics.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Workflow layer</h3>
+          <ul>
+            <li>Manual dispatch, schedules, and issue triggers.</li>
+            <li>Explicit approvals and audit trails.</li>
+            <li>Safe rollbacks and idempotent steps.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Agent runtime</h3>
+          <ul>
+            <li>Python execution with reproducible environments.</li>
+            <li>Structured logging and artifacts.</li>
+            <li>Designed for reliable remediation.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section style="animation-delay: 0.12s;">
+      <div class="tag">Operations</div>
+      <h2>Runbooks built for busy teams</h2>
+      <pre><code>cd C:\actions-runner
+$serviceName = Get-Content .\.service
+Restart-Service -Name $serviceName</code></pre>
+      <p style="color: var(--muted);">See <strong>docs/operations.md</strong> for upgrade, rotation, and health checks.</p>
+    </section>
+
+    <section style="animation-delay: 0.18s;">
+      <div class="tag">Security</div>
+      <h2>Least-privilege by default</h2>
+      <div class="grid">
+        <div>
+          <h3>Token scopes</h3>
+          <ul>
+            <li>Required: repo, workflow, read:org.</li>
+            <li>Optional: admin:org based on policy.</li>
+            <li>Always fetch short-lived tokens.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Auditability</h3>
+          <ul>
+            <li>GitHub Actions logs are authoritative.</li>
+            <li>Host logs retained for forensics.</li>
+            <li>Explicit approvals for sensitive tasks.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section style="animation-delay: 0.24s;">
+      <div class="tag">Reference</div>
+      <h2>Quick links</h2>
+      <div class="grid">
+        <a class="button" href="../architecture.md">Architecture</a>
+        <a class="button" href="../runner-setup.md">Runner setup</a>
+        <a class="button" href="../operations.md">Operations</a>
+        <a class="button" href="../security.md">Security</a>
+        <a class="button" href="../troubleshooting.md">Troubleshooting</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
