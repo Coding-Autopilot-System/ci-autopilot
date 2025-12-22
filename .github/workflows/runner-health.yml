@@ -21,7 +21,10 @@ jobs:
         id: status
         run: |
           set -euo pipefail
-          status="$(gh api repos/${GITHUB_REPOSITORY}/actions/runners --jq ".runners[] | select(.name==\"${RUNNER_NAME}\") | .status")"
+          status=""
+          if ! status="$(gh api repos/${GITHUB_REPOSITORY}/actions/runners --jq ".runners[] | select(.name==\"${RUNNER_NAME}\") | .status")"; then
+            status="unknown"
+          fi
           if [ -z "${status}" ]; then
             status="not_found"
           fi
@@ -47,6 +50,7 @@ jobs:
           - Verify the runner service on the host
           - Restart the service if needed
           - Confirm network reachability to GitHub
+          - If status is "unknown", set RUNNER_PAT with repo/workflow/read:org scopes
           EOF
           )
           if [ -n "${existing}" ]; then
