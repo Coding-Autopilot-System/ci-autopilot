@@ -30,3 +30,7 @@ Use the steps in `docs/runner-setup.md` to remove and re-register.
 `Runner Health Monitor` runs every 15 minutes on GitHub-hosted runners.
 If the self-hosted runner is offline, it opens or updates an issue labeled `runner-offline`.
 If SMTP secrets are configured, it also sends an email alert.
+
+## Runner status API access
+If the health monitor cannot list runners with the default `GITHUB_TOKEN`, add a repo secret
+named `RUNNER_PAT` with `repo` and `workflow` scopes (plus `read:org` for org repos).
