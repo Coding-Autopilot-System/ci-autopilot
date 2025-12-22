@@ -17,6 +17,20 @@ jobs:
       run:
         shell: pwsh
     steps:
+      - name: Preflight diagnostics
+        run: |
+          New-Item -ItemType Directory -Force logs | Out-Null
+          "Runner: $env:RUNNER_NAME" | Out-File -FilePath logs\preflight.log
+          "Repo: $env:GITHUB_REPOSITORY" | Out-File -FilePath logs\preflight.log -Append
+          "Workspace: $env:GITHUB_WORKSPACE" | Out-File -FilePath logs\preflight.log -Append
+          whoami | Out-File -FilePath logs\preflight.log -Append
+          Get-Command git -ErrorAction SilentlyContinue | Out-File -FilePath logs\preflight.log -Append
+          git --version 2>&1 | Out-File -FilePath logs\preflight.log -Append
+          if (Get-Command python -ErrorAction SilentlyContinue) { python --version 2>&1 | Out-File -FilePath logs\preflight.log -Append }
+          if (Get-Command py -ErrorAction SilentlyContinue) { py -3 --version 2>&1 | Out-File -FilePath logs\preflight.log -Append }
+          if (Get-Command gh -ErrorAction SilentlyContinue) { gh --version 2>&1 | Out-File -FilePath logs\preflight.log -Append }
+          "C:\\src\\ci-autopilot exists: $(Test-Path C:\\src\\ci-autopilot)" | Out-File -FilePath logs\preflight.log -Append
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -50,9 +64,6 @@ jobs:
       - name: Install dependencies
         run: .\.venv\Scripts\python -m pip install -r requirements.txt
 
-      - name: Prepare logs directory
-        run: New-Item -ItemType Directory -Force logs | Out-Null
-
       - name: Run CI Autopilot
         run: |
           .\.venv\Scripts\python -m agent.poll_once 2>&1 | Tee-Object -FilePath logs\run.log
@@ -63,4 +74,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ci-autopilot-logs
-          path: logs\run.log
+          path: logs\*.log
