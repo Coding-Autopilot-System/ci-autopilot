@@ -1,4 +1,4 @@
-name: CI Autopilot Fixer
+﻿name: CI Autopilot Fixer
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   fixer:
-    runs-on: [self-hosted, windows, ci-autopilot]
+    runs-on: [self-hosted, Windows]
     defaults:
       run:
         shell: pwsh
