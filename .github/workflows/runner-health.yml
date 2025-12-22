@@ -37,6 +37,7 @@ jobs:
           title="Runner offline: ${RUNNER_NAME}"
           marker="Autopilot Runner Health"
           status="${{ steps.status.outputs.runner_status }}"
+          gh label create runner-offline --color "B60205" --description "Runner offline alerts" --force --repo "${GITHUB_REPOSITORY}" || true
           existing="$(gh issue list -s open -l runner-offline -S "${title}" --repo "${GITHUB_REPOSITORY}" --json number --jq '.[0].number')"
           body=$(cat <<EOF
           ${marker}
