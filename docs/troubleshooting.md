@@ -14,6 +14,10 @@
 - Restart the service
 - Confirm the machine has outbound access to GitHub
 
+## Offline notification fires but runner is healthy
+- Confirm the runner name matches `MyLocalPC`
+- Check `Runner Health Monitor` workflow logs for API errors
+
 ## Service fails to start
 - Re-run registration steps
 - Check Windows Event Viewer for service errors

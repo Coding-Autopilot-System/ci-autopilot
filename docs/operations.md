@@ -25,3 +25,7 @@ Use the steps in `docs/runner-setup.md` to remove and re-register.
 ## Health checks
 - `Get-Service -Name $serviceName` should report `Running`
 - Runner should show `status: online` in repo runners list
+
+## Notifications
+`Runner Health Monitor` runs every 15 minutes on GitHub-hosted runners.
+If the self-hosted runner is offline, it opens or updates an issue labeled `runner-offline`.

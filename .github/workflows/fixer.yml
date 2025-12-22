@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   repository_dispatch:
     types: [ci-autopilot]
+  schedule:
+    - cron: "0 2 * * *"
 
 permissions:
   contents: read

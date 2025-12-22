@@ -4,6 +4,7 @@ This documentation set describes how to deploy, operate, and secure the CI Autop
 
 ## Contents
 - `docs/architecture.md` - System architecture and design goals
+- `docs/control-plane.md` - Failure intake and issue control plane
 - `docs/runner-setup.md` - Runner registration and service setup
 - `docs/operations.md` - Day-2 operations runbook
 - `docs/security.md` - Security posture and access model

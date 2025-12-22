@@ -1,0 +1,48 @@
+name: Autopilot Failure Intake
+
+on:
+  workflow_run:
+    workflows: ["CI Autopilot Fixer", "Runner Smoke Test"]
+    types: [completed]
+
+permissions:
+  actions: read
+  issues: write
+  contents: read
+
+jobs:
+  create-issue:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Create intake issue
+        run: |
+          set -euo pipefail
+          run_id="${{ github.event.workflow_run.id }}"
+          run_url="${{ github.event.workflow_run.html_url }}"
+          workflow="${{ github.event.workflow_run.name }}"
+          branch="${{ github.event.workflow_run.head_branch }}"
+          sha="${{ github.event.workflow_run.head_sha }}"
+          marker="Autopilot Run ID: ${run_id}"
+          existing="$(gh issue list -s open -l queued -S "${marker}" --json number --jq '.[0].number')"
+          if [ -n "${existing}" ]; then
+            exit 0
+          fi
+          title="Autopilot intake: ${workflow} failed on ${branch}"
+          body=$(cat <<EOF
+          ${marker}
+
+          Workflow: ${workflow}
+          Branch: ${branch}
+          SHA: ${sha}
+          Run: ${run_url}
+
+          Next steps:
+          - Pull logs and summarize the failure
+          - Prepare a minimal patch
+          - Validate locally and open a PR
+          EOF
+          )
+          gh issue create -t "${title}" -b "${body}" -l "queued,autofix"
