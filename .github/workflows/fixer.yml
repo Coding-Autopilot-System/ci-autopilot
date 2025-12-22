@@ -1,0 +1,55 @@
+name: CI Autopilot Fixer
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [ci-autopilot]
+
+jobs:
+  fixer:
+    runs-on: [self-hosted, windows, ci-autopilot]
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Create venv
+        run: python -m venv .venv
+
+      - name: Install dependencies
+        run: .\.venv\Scripts\python -m pip install -r requirements.txt
+
+      - name: Run CI Autopilot
+        run: .\.venv\Scripts\python -m agent.poll_once
+
+  fallback:
+    needs: fixer
+    if: ${{ needs.fixer.result == 'failure' }}
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Create venv
+        run: python -m venv .venv
+
+      - name: Install dependencies
+        run: .\.venv\Scripts\python -m pip install -r requirements.txt
+
+      - name: Run CI Autopilot
+        run: .\.venv\Scripts\python -m agent.poll_once

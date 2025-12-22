@@ -1,0 +1,68 @@
+import json
+import os
+import subprocess
+import sys
+from typing import Any
+
+def _run(cmd: list[str], timeout: int = 20) -> str:
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f"Command timed out after {timeout}s: {' '.join(cmd)}") from exc
+    if proc.returncode != 0:
+        stdout = proc.stdout.strip()
+        stderr = proc.stderr.strip()
+        detail = []
+        if stdout:
+            detail.append(f"STDOUT:\n{stdout}")
+        if stderr:
+            detail.append(f"STDERR:\n{stderr}")
+        detail_text = "\n".join(detail) if detail else "No output captured."
+        raise RuntimeError(f"Command failed: {' '.join(cmd)}\n{detail_text}")
+    return proc.stdout.strip()
+
+def _gh_api_json(path: str, fields: dict[str, str] | None = None, timeout: int = 20) -> Any:
+    cmd = ["gh", "api", path, "-H", "Accept: application/vnd.github+json"]
+    if fields:
+        for key, value in fields.items():
+            cmd.extend(["-f", f"{key}={value}"])
+    output = _run(cmd, timeout=timeout)
+    return json.loads(output) if output else None
+
+def _repo_from_env() -> tuple[str, str]:
+    repo_full = os.getenv("GITHUB_REPOSITORY", "").strip()
+    if repo_full and "/" in repo_full:
+        owner, repo = repo_full.split("/", 1)
+        return owner, repo
+    owner = os.getenv("GITHUB_OWNER", "Coding-Autopilot-System").strip()
+    repo = os.getenv("GITHUB_REPO", "ci-autopilot").strip()
+    return owner, repo
+
+def main() -> int:
+    owner, repo = _repo_from_env()
+    print(f"CI Autopilot poll_once starting for {owner}/{repo}")
+    print("Listing queued issues via gh api...")
+    try:
+        issues = _gh_api_json(
+            f"/repos/{owner}/{repo}/issues",
+            fields={"state": "open", "labels": "queued", "per_page": "50"},
+        )
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}")
+        return 1
+
+    issues = issues or []
+    queued = [it for it in issues if "pull_request" not in it]
+    print(f"Found {len(queued)} queued issues")
+    for it in queued[:5]:
+        num = it.get("number")
+        title = it.get("title")
+        url = it.get("html_url")
+        print(f"- #{num} {title}")
+        print(f"  {url}")
+
+    print("poll_once complete")
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
