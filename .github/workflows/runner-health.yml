@@ -54,3 +54,25 @@ jobs:
           else
             gh issue create -t "${title}" -b "${body}" -l "runner-offline"
           fi
+
+      - name: Email notification
+        if: steps.status.outputs.runner_status != 'online' && env.SMTP_SERVER != ''
+        uses: dawidd6/action-send-mail@v3
+        env:
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+        with:
+          server_address: ${{ env.SMTP_SERVER }}
+          server_port: ${{ env.SMTP_PORT }}
+          username: ${{ env.SMTP_USERNAME }}
+          password: ${{ env.SMTP_PASSWORD }}
+          subject: "Runner offline: MyLocalPC"
+          body: |
+            Runner: MyLocalPC
+            Repo: ${{ github.repository }}
+            Status: ${{ steps.status.outputs.runner_status }}
+          to: ogeonx@gmail.com
+          from: ${{ env.EMAIL_FROM }}

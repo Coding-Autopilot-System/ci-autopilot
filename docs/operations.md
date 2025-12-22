@@ -29,3 +29,4 @@ Use the steps in `docs/runner-setup.md` to remove and re-register.
 ## Notifications
 `Runner Health Monitor` runs every 15 minutes on GitHub-hosted runners.
 If the self-hosted runner is offline, it opens or updates an issue labeled `runner-offline`.
+If SMTP secrets are configured, it also sends an email alert.
