@@ -16,6 +16,9 @@ jobs:
     defaults:
       run:
         shell: pwsh
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Preflight diagnostics
         run: |
