@@ -10,4 +10,4 @@ This documentation set describes how to deploy, operate, and secure the CI Autop
 - `docs/troubleshooting.md` - Common issues and remediation
 
 ## Web page
-The professional landing page is at `docs/site/index.html`. Publish it with GitHub Pages or any static host.
+The professional landing page is at `docs/index.html`. Publish it with GitHub Pages or any static host.
