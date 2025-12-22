@@ -2,11 +2,15 @@ import json
 import os
 import subprocess
 import sys
+import urllib.parse
+import urllib.request
 from typing import Any
 
 def _run(cmd: list[str], timeout: int = 20) -> str:
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    except FileNotFoundError as exc:
+        raise RuntimeError(f"Command not found: {cmd[0]}") from exc
     except subprocess.TimeoutExpired as exc:
         raise RuntimeError(f"Command timed out after {timeout}s: {' '.join(cmd)}") from exc
     if proc.returncode != 0:
@@ -21,7 +25,34 @@ def _run(cmd: list[str], timeout: int = 20) -> str:
         raise RuntimeError(f"Command failed: {' '.join(cmd)}\n{detail_text}")
     return proc.stdout.strip()
 
+def _github_token() -> str | None:
+    token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
+    return token.strip() if token else None
+
+def _gh_api_http(path: str, fields: dict[str, str] | None = None, timeout: int = 20) -> Any:
+    token = _github_token()
+    if not token:
+        raise RuntimeError("GITHUB_TOKEN/GH_TOKEN not available for HTTP API call.")
+    query = f"?{urllib.parse.urlencode(fields)}" if fields else ""
+    url = f"https://api.github.com{path}{query}"
+    req = urllib.request.Request(url)
+    req.add_header("Accept", "application/vnd.github+json")
+    req.add_header("X-GitHub-Api-Version", "2022-11-28")
+    req.add_header("Authorization", f"Bearer {token}")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            body = resp.read().decode("utf-8")
+    except urllib.error.HTTPError as exc:
+        err_body = exc.read().decode("utf-8") if exc.fp else ""
+        raise RuntimeError(f"GitHub API error {exc.code}: {err_body}") from exc
+    return json.loads(body) if body else None
+
 def _gh_api_json(path: str, fields: dict[str, str] | None = None, timeout: int = 20) -> Any:
+    token = _github_token()
+    if token:
+        print("Using GITHUB_TOKEN for GitHub API requests.")
+        return _gh_api_http(path, fields=fields, timeout=timeout)
+    print("GITHUB_TOKEN not found, falling back to gh CLI.")
     cmd = ["gh", "api", path, "-H", "Accept: application/vnd.github+json"]
     if fields:
         for key, value in fields.items():

@@ -5,6 +5,10 @@ on:
   repository_dispatch:
     types: [ci-autopilot]
 
+permissions:
+  contents: read
+  issues: read
+
 jobs:
   fixer:
     runs-on: [self-hosted, Windows]
