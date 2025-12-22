@@ -8,6 +8,7 @@ on:
 jobs:
   fixer:
     runs-on: [self-hosted, Windows]
+    timeout-minutes: 20
     defaults:
       run:
         shell: pwsh
@@ -26,30 +27,17 @@ jobs:
       - name: Install dependencies
         run: .\.venv\Scripts\python -m pip install -r requirements.txt
 
+      - name: Prepare logs directory
+        run: New-Item -ItemType Directory -Force logs | Out-Null
+
       - name: Run CI Autopilot
-        run: .\.venv\Scripts\python -m agent.poll_once
+        run: |
+          .\.venv\Scripts\python -m agent.poll_once 2>&1 | Tee-Object -FilePath logs\run.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-  fallback:
-    needs: fixer
-    if: ${{ needs.fixer.result == 'failure' }}
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: pwsh
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          python-version: "3.13"
-
-      - name: Create venv
-        run: python -m venv .venv
-
-      - name: Install dependencies
-        run: .\.venv\Scripts\python -m pip install -r requirements.txt
-
-      - name: Run CI Autopilot
-        run: .\.venv\Scripts\python -m agent.poll_once
+          name: ci-autopilot-logs
+          path: logs\run.log

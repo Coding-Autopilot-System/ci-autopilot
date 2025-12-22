@@ -1,0 +1,26 @@
+name: Runner Smoke Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke-test:
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Runner basics
+        run: |
+          Write-Host "Runner name: $env:RUNNER_NAME"
+          Write-Host "Runner OS: $env:RUNNER_OS"
+          Write-Host "Runner arch: $env:RUNNER_ARCH"
+          Write-Host "Repo: $env:GITHUB_REPOSITORY"
+
+      - name: Tool versions
+        run: |
+          git --version
+          python --version
+          node --version
+          gh --version
