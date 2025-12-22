@@ -23,13 +23,29 @@ jobs:
           clean: false
           fetch-depth: 1
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
+      - name: Python diagnostics
+        run: |
+          if (Get-Command python -ErrorAction SilentlyContinue) {
+            python --version
+          } elseif (Get-Command py -ErrorAction SilentlyContinue) {
+            py -3 --version
+          } else {
+            throw "Python not found in PATH."
+          }
 
       - name: Create venv
-        run: python -m venv .venv
+        run: |
+          $py = Get-Command python -ErrorAction SilentlyContinue
+          if ($py) {
+            & $py.Source -m venv .venv
+            return
+          }
+          $pyLauncher = Get-Command py -ErrorAction SilentlyContinue
+          if ($pyLauncher) {
+            & $pyLauncher.Source -3 -m venv .venv
+            return
+          }
+          throw "Python not found for venv creation."
 
       - name: Install dependencies
         run: .\.venv\Scripts\python -m pip install -r requirements.txt
