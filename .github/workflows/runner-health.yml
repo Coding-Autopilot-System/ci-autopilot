@@ -37,7 +37,7 @@ jobs:
           title="Runner offline: ${RUNNER_NAME}"
           marker="Autopilot Runner Health"
           status="${{ steps.status.outputs.runner_status }}"
-          existing="$(gh issue list -s open -l runner-offline -S "${title}" --json number --jq '.[0].number')"
+          existing="$(gh issue list -s open -l runner-offline -S "${title}" --repo "${GITHUB_REPOSITORY}" --json number --jq '.[0].number')"
           body=$(cat <<EOF
           ${marker}
 
@@ -54,9 +54,9 @@ jobs:
           EOF
           )
           if [ -n "${existing}" ]; then
-            gh issue comment "${existing}" -b "${body}"
+            gh issue comment "${existing}" -b "${body}" --repo "${GITHUB_REPOSITORY}"
           else
-            gh issue create -t "${title}" -b "${body}" -l "runner-offline"
+            gh issue create -t "${title}" -b "${body}" -l "runner-offline" --repo "${GITHUB_REPOSITORY}"
           fi
 
       - name: Email notification
