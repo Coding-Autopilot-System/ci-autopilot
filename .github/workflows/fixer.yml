@@ -1,4 +1,4 @@
-﻿name: CI Autopilot Fixer
+name: CI Autopilot Fixer
 
 on:
   workflow_dispatch:
@@ -39,7 +39,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          clean: false
+          clean: true
           fetch-depth: 1
 
       - name: Python diagnostics
