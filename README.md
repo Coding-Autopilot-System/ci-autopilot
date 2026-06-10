@@ -15,7 +15,7 @@ The agent (`agent/poll_once.py`) is a Python 3.12 stdlib-only program that polls
 ## Repo boundary
 
 - `autopilot-core` is the control plane for org-level scheduling, rollout, and PR governance.
-- `ci-autopilot` is the worker/runtime implementation for runner execution, queue polling, and repair dispatch.
+- `ci-autopilot` is the worker/runtime implementation for runner execution and read-only queue polling.
 - `autopilot-demo` is the demonstration target used to show the runtime and control plane working together.
 
 ## Architecture
@@ -25,8 +25,8 @@ flowchart LR
     A["GitHub Actions\nfailure detected"] --> B["autopilot-failure-intake\n(intake workflow)"]
     B --> C["Issue queue\n(runner-offline label)"]
     C --> D["agent/poll_once.py\n(Python 3.12)"]
-    D --> E["Codex\n(repair dispatch)"]
-    E --> F["PR / fix\ncommitted"]
+    D --> E["Operator visibility\n(read-only inventory)"]
+    E -. "future guarded dispatcher" .-> F["PR-only repair path"]
 ```
 
 **Core components:**
@@ -36,7 +36,7 @@ flowchart LR
 - **fixer.yml** - Runs the read-only `agent/poll_once.py` queue inventory on the self-hosted Windows runner
 - **agent/poll_once.py** - Python 3.12 stdlib agent; validates repository input and inventories the issue queue
 - **runner-smoke-test.yml** - Smoke tests the self-hosted runner on demand
-- **runner-health.yml** - Manual runner health check (dispatch only)
+- **runner-health.yml** - Scheduled and on-demand runner health check
 
 ## Enterprise proof points
 
