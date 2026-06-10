@@ -2,6 +2,8 @@ name: Runner Health Monitor
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
 
 permissions:
   actions: read
