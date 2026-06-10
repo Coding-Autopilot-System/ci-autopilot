@@ -60,7 +60,7 @@ jobs:
 
       - name: Email notification
         if: steps.status.outputs.runner_status != 'online' && env.SMTP_SERVER != ''
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@4226df7daafa6fc901a43789c49bf7ab309066e7 # v3
         env:
           SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
