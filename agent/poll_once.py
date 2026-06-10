@@ -86,7 +86,9 @@ def _validate_repo_segment(value: str, name: str) -> str:
 
 def _repo_from_env() -> tuple[str, str]:
     repo_full = os.getenv("GITHUB_REPOSITORY", "").strip()
-    if repo_full and repo_full.count("/") == 1:
+    if repo_full:
+        if repo_full.count("/") != 1:
+            raise RuntimeError(f"Invalid GitHub repository: {repo_full!r}")
         owner, repo = repo_full.split("/", 1)
     else:
         owner = os.getenv("GITHUB_OWNER", "Coding-Autopilot-System")

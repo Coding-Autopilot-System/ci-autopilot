@@ -18,3 +18,5 @@ jobs:
         run: python -m py_compile agent/poll_once.py
       - name: Import check
         run: python -c "import agent.poll_once"
+      - name: Unit tests
+        run: python -m unittest discover -v
