@@ -48,3 +48,6 @@ Scope: worker/runtime correctness, security boundaries, CI, tests, packaging, re
 ## Manual Gate
 
 Do not grant worker write permissions or execute issue content until F-11 and F-12 have approved designs and testable controls.
+## Delivery Status
+
+Local branch tip is ready, but HTTPS push is blocked because the configured OAuth credential lacks the GitHub workflow scope. SSH authentication is not configured. PR #1965 therefore remains at its prior remote tip until credentials are refreshed.
