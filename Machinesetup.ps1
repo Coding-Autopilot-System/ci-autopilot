@@ -17,7 +17,7 @@ Write-Host ("winget: " + ($(if($hasWinget){"OK"}else{"MISSING"})))
 # Tools we want
 $want = @(
   @{name="git";    check="git";    winget="Git.Git"},
-  @{name="python"; check="python"; winget="Python.Python.3.11"},
+  @{name="python"; check="python"; winget="Python.Python.3.12"},
   @{name="node";   check="node";   winget="OpenJS.NodeJS.LTS"},
   @{name="npm";    check="npm";    winget="OpenJS.NodeJS.LTS"},
   @{name="gh";     check="gh";     winget="GitHub.cli"}
