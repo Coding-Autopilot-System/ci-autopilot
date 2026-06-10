@@ -16,6 +16,7 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.RUNNER_PAT || github.token }}
       RUNNER_NAME: MyLocalPC
+      EMAIL_TO: ${{ secrets.EMAIL_TO }}
     steps:
       - name: Check runner status
         id: status
@@ -61,7 +62,7 @@ jobs:
           fi
 
       - name: Email notification
-        if: steps.status.outputs.runner_status != 'online' && env.SMTP_SERVER != ''
+        if: steps.status.outputs.runner_status != 'online' && env.SMTP_SERVER != '' && env.EMAIL_TO != ''
         uses: dawidd6/action-send-mail@4226df7daafa6fc901a43789c49bf7ab309066e7 # v3
         env:
           SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
@@ -79,5 +80,5 @@ jobs:
             Runner: MyLocalPC
             Repo: ${{ github.repository }}
             Status: ${{ steps.status.outputs.runner_status }}
-          to: ogeonx@gmail.com
+          to: ${{ env.EMAIL_TO }}
           from: ${{ env.EMAIL_FROM }}
