@@ -1,4 +1,4 @@
-﻿name: CI Autopilot Fixer
+name: CI Autopilot Fixer
 
 on:
   workflow_dispatch:
@@ -22,6 +22,12 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GITHUB_TOKEN: ${{ github.token }}
     steps:
+      - name: Checkout clean workspace
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          clean: true
+          fetch-depth: 1
+
       - name: Preflight diagnostics
         run: |
           New-Item -ItemType Directory -Force logs | Out-Null
@@ -35,12 +41,6 @@ jobs:
           if (Get-Command py -ErrorAction SilentlyContinue) { py -3 --version 2>&1 | Out-File -FilePath logs\preflight.log -Append }
           if (Get-Command gh -ErrorAction SilentlyContinue) { gh --version 2>&1 | Out-File -FilePath logs\preflight.log -Append }
           "C:\\src\\ci-autopilot exists: $(Test-Path C:\\src\\ci-autopilot)" | Out-File -FilePath logs\preflight.log -Append
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          clean: false
-          fetch-depth: 1
 
       - name: Python diagnostics
         run: |
@@ -76,7 +76,7 @@ jobs:
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ci-autopilot-logs
           path: logs\*.log

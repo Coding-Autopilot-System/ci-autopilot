@@ -15,3 +15,6 @@
 
 ## Rotation
 - Remove and re-register runners on a cadence or after incident response
+
+## Worker boundary
+The current fixer workflow grants only contents: read and issues: read. The worker treats issue data as untrusted display-only input and does not execute it. Any future repair dispatcher must define command allowlists, sandboxing, queue-state authorization, and PR-only output before receiving write permissions.

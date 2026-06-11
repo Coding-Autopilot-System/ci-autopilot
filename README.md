@@ -1,6 +1,6 @@
 # ci-autopilot
 
-AI-powered CI autopilot worker/runtime - detects GitHub Actions failures and dispatches repairs via a Python agent
+CI autopilot worker/runtime - detects GitHub Actions failures and inventories queued repair issues via a Python agent
 
 [![CI](https://github.com/Coding-Autopilot-System/ci-autopilot/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Coding-Autopilot-System/ci-autopilot/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
@@ -8,14 +8,14 @@ AI-powered CI autopilot worker/runtime - detects GitHub Actions failures and dis
 
 ## Overview
 
-`ci-autopilot` packages the worker/runtime side of the platform. It monitors GitHub Actions workflows, detects failures, triages them via an issue queue, and dispatches autonomous repairs using a Python agent backed by Codex. It runs on a self-hosted runner and provides the execution path from queued repair task to proposed fix.
+`ci-autopilot` packages the worker/runtime side of the platform. It monitors GitHub Actions workflows, detects failures, and exposes them through an issue queue. The current Python worker is deliberately read-only: it inventories queued issues on a self-hosted runner. Autonomous repair dispatch and queue state transitions are not implemented yet.
 
-The agent (`agent/poll_once.py`) is a Python 3.12 stdlib-only program that polls the issue queue, picks up queued repair tasks, and dispatches them to the Codex repair pipeline. No external dependencies are required.
+The agent (`agent/poll_once.py`) is a Python 3.12 stdlib-only program that polls the issue queue and lists queued repair tasks for operator visibility. No external dependencies are required.
 
 ## Repo boundary
 
 - `autopilot-core` is the control plane for org-level scheduling, rollout, and PR governance.
-- `ci-autopilot` is the worker/runtime implementation for runner execution, queue polling, and repair dispatch.
+- `ci-autopilot` is the worker/runtime implementation for runner execution and read-only queue polling.
 - `autopilot-demo` is the demonstration target used to show the runtime and control plane working together.
 
 ## Architecture
@@ -25,33 +25,35 @@ flowchart LR
     A["GitHub Actions\nfailure detected"] --> B["autopilot-failure-intake\n(intake workflow)"]
     B --> C["Issue queue\n(runner-offline label)"]
     C --> D["agent/poll_once.py\n(Python 3.12)"]
-    D --> E["Codex\n(repair dispatch)"]
-    E --> F["PR / fix\ncommitted"]
+    D --> E["Operator visibility\n(read-only inventory)"]
+    E -. "future guarded dispatcher" .-> F["PR-only repair path"]
 ```
 
 **Core components:**
 
 - **autopilot-failure-intake.yml** - Intake workflow triggered on `workflow_run` failure events; creates a queued issue
 - **autopilot-create-issue.yml** - Creates GitHub issues via `actions/github-script` when monitored workflows fail
-- **fixer.yml** - Main CI autopilot; runs `agent/poll_once.py` on the self-hosted Windows runner
-- **agent/poll_once.py** - Python 3.12 stdlib agent; polls the issue queue and dispatches repairs
+- **fixer.yml** - Runs the read-only `agent/poll_once.py` queue inventory on the self-hosted Windows runner
+- **agent/poll_once.py** - Python 3.12 stdlib agent; validates repository input and inventories the issue queue
 - **runner-smoke-test.yml** - Smoke tests the self-hosted runner on demand
-- **runner-health.yml** - Manual runner health check (dispatch only)
+- **runner-health.yml** - Scheduled and on-demand runner health check
 
 ## Enterprise proof points
 
 - Deliberately small runtime surface: Python 3.12 stdlib-only agent for easier audit and rebuild.
-- Clear separation of concerns: issue intake and governance stay in the control plane; repair execution stays on the worker.
+- Clear separation of concerns: issue intake and governance stay in the control plane; worker execution and future guarded repair dispatch stay on the worker boundary.
 - Self-hosted runner model supports enterprise network boundaries, managed toolchains, and least-privilege token handling.
-- Queue-driven processing creates an auditable handoff between CI failure detection and agent action.
+- Queue-driven intake creates an auditable handoff between CI failure detection and operator review.
 
 ## Quick Start
 
-```bash
-# Prerequisites: Python 3.12, GitHub CLI, GH_TOKEN env var
-export GH_TOKEN=<your_token>
+```pwsh
+# Prerequisites: Python 3.12 and authenticated GitHub CLI
+$env:GH_TOKEN = gh auth token
 python -m agent.poll_once
 ```
+
+The worker only reads and lists queued issues. It does not execute issue content, mutate repositories, or dispatch Codex.
 
 For full runner registration, service setup, and local development instructions see the [Setup Guide](https://github.com/Coding-Autopilot-System/ci-autopilot/wiki/Setup-Guide) wiki page.
 

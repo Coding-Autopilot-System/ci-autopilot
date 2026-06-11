@@ -1,19 +1,19 @@
 # Architecture
 
 ## Overview
-CI Autopilot is a runner-hosted automation layer that coordinates Codex-driven workflows, issue triage, and safe remediation.
+CI Autopilot is a runner-hosted automation layer that coordinates failure intake, queued-issue inventory, and operator visibility. Guarded remediation dispatch is a future capability.
 
 ## Core components
 - Runner host: Windows service running GitHub Actions self-hosted runner
 - Workflow layer: GitHub Actions workflows that trigger repair or hygiene pipelines
-- Agent runtime: Python agent that executes tasks and reports status
+- Agent runtime: read-only Python agent that validates repository context and inventories queued issues
 - Control plane: Repository configuration and issue workflow conventions
 - Logs and artifacts: Local logs and GitHub Action run outputs
 
 ## Data flow (high level)
 1) Event triggers a workflow (dispatch, schedule, or issue activity)
 2) Workflow schedules a job to the self-hosted runner
-3) Runner executes the agent or scripts in a controlled workspace
+3) Runner executes the read-only queue poller in a cleaned workspace
 4) Artifacts and logs are uploaded for audit and review
 
 ## Design goals

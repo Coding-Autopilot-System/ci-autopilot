@@ -1,10 +1,15 @@
 import json
 import os
+import re
 import subprocess
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any
+
+_REPO_SEGMENT = re.compile(r"[A-Za-z0-9_.-]+")
+
 
 def _run(cmd: list[str], timeout: int = 20) -> str:
     try:
@@ -25,9 +30,11 @@ def _run(cmd: list[str], timeout: int = 20) -> str:
         raise RuntimeError(f"Command failed: {' '.join(cmd)}\n{detail_text}")
     return proc.stdout.strip()
 
+
 def _github_token() -> str | None:
     token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
     return token.strip() if token else None
+
 
 def _gh_api_http(path: str, fields: dict[str, str] | None = None, timeout: int = 20) -> Any:
     token = _github_token()
@@ -45,7 +52,13 @@ def _gh_api_http(path: str, fields: dict[str, str] | None = None, timeout: int =
     except urllib.error.HTTPError as exc:
         err_body = exc.read().decode("utf-8") if exc.fp else ""
         raise RuntimeError(f"GitHub API error {exc.code}: {err_body}") from exc
-    return json.loads(body) if body else None
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"GitHub API request failed: {exc.reason}") from exc
+    try:
+        return json.loads(body) if body else None
+    except json.JSONDecodeError as exc:
+        raise RuntimeError("GitHub API returned invalid JSON.") from exc
+
 
 def _gh_api_json(path: str, fields: dict[str, str] | None = None, timeout: int = 20) -> Any:
     token = _github_token()
@@ -58,21 +71,39 @@ def _gh_api_json(path: str, fields: dict[str, str] | None = None, timeout: int =
         for key, value in fields.items():
             cmd.extend(["-f", f"{key}={value}"])
     output = _run(cmd, timeout=timeout)
-    return json.loads(output) if output else None
+    try:
+        return json.loads(output) if output else None
+    except json.JSONDecodeError as exc:
+        raise RuntimeError("gh CLI returned invalid JSON.") from exc
+
+
+def _validate_repo_segment(value: str, name: str) -> str:
+    value = value.strip()
+    if not value or not _REPO_SEGMENT.fullmatch(value):
+        raise RuntimeError(f"Invalid GitHub {name}: {value!r}")
+    return value
+
 
 def _repo_from_env() -> tuple[str, str]:
     repo_full = os.getenv("GITHUB_REPOSITORY", "").strip()
-    if repo_full and "/" in repo_full:
+    if repo_full:
+        if repo_full.count("/") != 1:
+            raise RuntimeError(f"Invalid GitHub repository: {repo_full!r}")
         owner, repo = repo_full.split("/", 1)
-        return owner, repo
-    owner = os.getenv("GITHUB_OWNER", "Coding-Autopilot-System").strip()
-    repo = os.getenv("GITHUB_REPO", "ci-autopilot").strip()
-    return owner, repo
+    else:
+        owner = os.getenv("GITHUB_OWNER", "Coding-Autopilot-System")
+        repo = os.getenv("GITHUB_REPO", "ci-autopilot")
+    return _validate_repo_segment(owner, "owner"), _validate_repo_segment(repo, "repository")
+
 
 def main() -> int:
-    owner, repo = _repo_from_env()
+    try:
+        owner, repo = _repo_from_env()
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}")
+        return 1
     print(f"CI Autopilot poll_once starting for {owner}/{repo}")
-    print("Listing queued issues via gh api...")
+    print("Listing queued issues via GitHub API...")
     try:
         issues = _gh_api_json(
             f"/repos/{owner}/{repo}/issues",
@@ -82,8 +113,12 @@ def main() -> int:
         print(f"ERROR: {exc}")
         return 1
 
-    issues = issues or []
-    queued = [it for it in issues if "pull_request" not in it]
+    if issues is None:
+        issues = []
+    if not isinstance(issues, list):
+        print("ERROR: GitHub API returned an unexpected issues response.")
+        return 1
+    queued = [it for it in issues if isinstance(it, dict) and "pull_request" not in it]
     print(f"Found {len(queued)} queued issues")
     for it in queued[:5]:
         num = it.get("number")
@@ -94,6 +129,7 @@ def main() -> int:
 
     print("poll_once complete")
     return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
