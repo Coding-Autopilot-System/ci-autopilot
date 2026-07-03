@@ -1,5 +1,8 @@
 # ci-autopilot
 
+[![CI](https://github.com/Coding-Autopilot-System/ci-autopilot/actions/workflows/ci.yml/badge.svg)](https://github.com/Coding-Autopilot-System/ci-autopilot/actions/workflows/ci.yml) [![CodeQL](https://github.com/Coding-Autopilot-System/ci-autopilot/actions/workflows/codeql.yml/badge.svg)](https://github.com/Coding-Autopilot-System/ci-autopilot/actions/workflows/codeql.yml)
+
+
 CI autopilot worker/runtime - detects GitHub Actions failures and inventories queued repair issues via a Python agent
 
 [![CI](https://github.com/Coding-Autopilot-System/ci-autopilot/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Coding-Autopilot-System/ci-autopilot/actions/workflows/ci.yml)
