@@ -13,6 +13,7 @@ permissions:
 jobs:
   check-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       GH_TOKEN: ${{ secrets.RUNNER_PAT || github.token }}
       RUNNER_NAME: MyLocalPC
