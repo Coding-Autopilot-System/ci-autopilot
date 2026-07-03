@@ -2,7 +2,6 @@ import json
 import os
 import re
 import subprocess
-import sys
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -66,7 +65,7 @@ def _gh_api_json(path: str, fields: dict[str, str] | None = None, timeout: int =
         print("Using GITHUB_TOKEN for GitHub API requests.")
         return _gh_api_http(path, fields=fields, timeout=timeout)
     print("GITHUB_TOKEN not found, falling back to gh CLI.")
-    cmd = ["gh", "api", path, "-H", "Accept: application/vnd.github+json"]
+    cmd = ["gh", "api", path, "-X", "GET", "-H", "Accept: application/vnd.github+json"]
     if fields:
         for key, value in fields.items():
             cmd.extend(["-f", f"{key}={value}"])
