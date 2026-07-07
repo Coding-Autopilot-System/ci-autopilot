@@ -1,1 +1,2 @@
 # Base requirements for CI Autopilot
+pytest-cov
