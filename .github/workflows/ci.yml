@@ -22,5 +22,7 @@ jobs:
         run: python -m py_compile agent/poll_once.py
       - name: Import check
         run: python -c "import agent.poll_once"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
       - name: Unit tests
-        run: python -m unittest discover -v
+        run: pytest --cov=agent --cov-report=term-missing --cov-fail-under=90 tests/
