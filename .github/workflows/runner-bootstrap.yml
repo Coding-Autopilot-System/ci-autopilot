@@ -2,6 +2,9 @@ name: Runner Bootstrap
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - codex/runner-bootstrap-self-hosted
 
 permissions:
   contents: read
