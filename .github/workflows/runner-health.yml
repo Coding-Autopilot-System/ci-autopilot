@@ -76,9 +76,9 @@ jobs:
           server_port: ${{ env.SMTP_PORT }}
           username: ${{ env.SMTP_USERNAME }}
           password: ${{ env.SMTP_PASSWORD }}
-          subject: "Runner offline: MyLocalPC"
+          subject: "Runner offline: ${{ env.MONITORED_RUNNER_NAME }}"
           body: |
-            Runner: MyLocalPC
+            Runner: ${{ env.MONITORED_RUNNER_NAME }}
             Repo: ${{ github.repository }}
             Status: ${{ steps.status.outputs.runner_status }}
           to: ${{ env.EMAIL_TO }}
