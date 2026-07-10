@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 15
     env:
       GH_TOKEN: ${{ secrets.RUNNER_PAT || github.token }}
-      RUNNER_NAME: MyLocalPC
+      RUNNER_NAME: CAS-Workstation-Kim
       EMAIL_TO: ${{ secrets.EMAIL_TO }}
     steps:
       - name: Check runner status
@@ -76,9 +76,9 @@ jobs:
           server_port: ${{ env.SMTP_PORT }}
           username: ${{ env.SMTP_USERNAME }}
           password: ${{ env.SMTP_PASSWORD }}
-          subject: "Runner offline: MyLocalPC"
+          subject: "Runner offline: CAS-Workstation-Kim"
           body: |
-            Runner: MyLocalPC
+            Runner: CAS-Workstation-Kim
             Repo: ${{ github.repository }}
             Status: ${{ steps.status.outputs.runner_status }}
           to: ${{ env.EMAIL_TO }}

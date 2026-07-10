@@ -17,10 +17,12 @@ Write-Host ("winget: " + ($(if($hasWinget){"OK"}else{"MISSING"})))
 # Tools we want
 $want = @(
   @{name="git";    check="git";    winget="Git.Git"},
+  @{name="pwsh";   check="pwsh";   winget="Microsoft.PowerShell"},
   @{name="python"; check="python"; winget="Python.Python.3.12"},
   @{name="node";   check="node";   winget="OpenJS.NodeJS.LTS"},
   @{name="npm";    check="npm";    winget="OpenJS.NodeJS.LTS"},
-  @{name="gh";     check="gh";     winget="GitHub.cli"}
+  @{name="gh";     check="gh";     winget="GitHub.cli"},
+  @{name="dotnet"; check="dotnet"; winget="Microsoft.DotNet.SDK.10"}
 )
 
 # Install missing tools

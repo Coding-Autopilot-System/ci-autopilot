@@ -1,4 +1,4 @@
-name: Runner Smoke Test
+name: Runner Bootstrap
 
 on:
   workflow_dispatch:
@@ -7,38 +7,47 @@ permissions:
   contents: read
 
 jobs:
-  smoke-test:
+  bootstrap:
     runs-on: [self-hosted, Windows]
-    timeout-minutes: 10
+    timeout-minutes: 30
     defaults:
       run:
         shell: powershell
     steps:
-      - name: Runner basics
-        run: |
-          Write-Host "Runner name: $env:RUNNER_NAME"
-          Write-Host "Runner OS: $env:RUNNER_OS"
-          Write-Host "Runner arch: $env:RUNNER_ARCH"
-          Write-Host "Machine: $env:COMPUTERNAME"
-          Write-Host "Repo: $env:GITHUB_REPOSITORY"
+      - name: Checkout clean workspace
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          clean: true
+          fetch-depth: 1
 
-      - name: Tool versions
+      - name: Bootstrap runner toolchain
+        run: .\Machinesetup.ps1
+
+      - name: Validate core tools
         run: |
           $tools = @(
             @{ Name = "git"; Command = "git"; Args = @("--version") },
             @{ Name = "pwsh"; Command = "pwsh"; Args = @("--version") },
             @{ Name = "python"; Command = "python"; Args = @("--version") },
             @{ Name = "node"; Command = "node"; Args = @("--version") },
-            @{ Name = "gh"; Command = "gh"; Args = @("--version") }
+            @{ Name = "npm"; Command = "npm"; Args = @("--version") },
+            @{ Name = "gh"; Command = "gh"; Args = @("--version") },
+            @{ Name = "dotnet"; Command = "dotnet"; Args = @("--version") }
           )
 
+          $missing = @()
           foreach ($tool in $tools) {
             $command = Get-Command $tool.Command -ErrorAction SilentlyContinue
             if (-not $command) {
               Write-Host "[missing] $($tool.Name)"
+              $missing += $tool.Name
               continue
             }
 
             Write-Host "[ok] $($tool.Name)"
             & $command.Source @($tool.Args)
+          }
+
+          if ($missing.Count -gt 0) {
+            throw "Missing required tools after bootstrap: $($missing -join ', ')"
           }
