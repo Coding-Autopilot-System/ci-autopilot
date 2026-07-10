@@ -48,3 +48,5 @@ $rows | Format-Table -AutoSize
 
 Write-Host ""
 Write-Host "Next: authenticate GitHub CLI (gh auth login) and verify access."
+
+$global:LASTEXITCODE = 0
