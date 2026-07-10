@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 15
     env:
       GH_TOKEN: ${{ secrets.RUNNER_PAT || github.token }}
-      RUNNER_NAME: MyLocalPC
+      MONITORED_RUNNER_NAME: CAS-Workstation-Kim
       EMAIL_TO: ${{ secrets.EMAIL_TO }}
     steps:
       - name: Check runner status
@@ -24,7 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           status=""
-          if ! status="$(gh api repos/${GITHUB_REPOSITORY}/actions/runners --jq ".runners[] | select(.name==\"${RUNNER_NAME}\") | .status")"; then
+          if ! status="$(gh api repos/${GITHUB_REPOSITORY}/actions/runners --jq ".runners[] | select(.name==\"${MONITORED_RUNNER_NAME}\") | .status")"; then
             status="unknown"
           fi
           if [ -z "${status}" ]; then
@@ -36,7 +36,7 @@ jobs:
         if: steps.status.outputs.runner_status != 'online'
         run: |
           set -euo pipefail
-          title="Runner offline: ${RUNNER_NAME}"
+          title="Runner offline: ${MONITORED_RUNNER_NAME}"
           marker="Autopilot Runner Health"
           status="${{ steps.status.outputs.runner_status }}"
           gh label create runner-offline --color "B60205" --description "Runner offline alerts" --force --repo "${GITHUB_REPOSITORY}" || true
@@ -44,7 +44,7 @@ jobs:
           body=$(cat <<EOF
           ${marker}
 
-          Runner: ${RUNNER_NAME}
+          Runner: ${MONITORED_RUNNER_NAME}
           Status: ${status}
           Repo: ${GITHUB_REPOSITORY}
           Time: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
