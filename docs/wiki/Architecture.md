@@ -1,5 +1,7 @@
 # Architecture
 
+![Architecture Diagram](assets/arch.png)
+
 `ci-autopilot` packages the worker/runtime side of the platform. The runtime surface is
 deliberately small: `agent/poll_once.py` is a Python 3.12 stdlib-only program (no external
 dependencies) that runs on a self-hosted Windows runner via the `fixer.yml` workflow, polling
